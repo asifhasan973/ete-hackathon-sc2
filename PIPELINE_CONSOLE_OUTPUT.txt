@@ -1,0 +1,276 @@
+========================================================================
+             CI/CD PIPELINE EXECUTION - CONSOLE OUTPUT
+========================================================================
+
+Started by user Admin
+Running in /var/jenkins_home/workspace/demo-cicd-pipeline
+
+[Pipeline] Start of Pipeline
+[Pipeline] node
+Running on Jenkins in /var/jenkins_home/workspace/demo-cicd-pipeline
+[Pipeline] {
+[Pipeline] stage (Checkout)
+[Pipeline] {
+
+==========================================
+Stage 1: Checking out source code...
+==========================================
++ echo 'Current directory: /var/jenkins_home/workspace/demo-cicd-pipeline'
+Current directory: /var/jenkins_home/workspace/demo-cicd-pipeline
++ ls -la
+total 48
+drwxr-xr-x  8 jenkins jenkins 4096 Nov 13 10:30 .
+drwxr-xr-x  3 jenkins jenkins 4096 Nov 13 10:29 ..
+drwxr-xr-x  4 jenkins jenkins 4096 Nov 13 10:30 app
+-rw-r--r--  1 jenkins jenkins  568 Nov 13 10:30 Dockerfile
+-rw-r--r--  1 jenkins jenkins  412 Nov 13 10:30 docker-compose.yml
+-rw-r--r--  1 jenkins jenkins 2145 Nov 13 10:30 Jenkinsfile
+-rwxr-xr-x  1 jenkins jenkins 4356 Nov 13 10:30 healthcheck.sh
+-rw-r--r--  1 jenkins jenkins 8234 Nov 13 10:30 README.md
+
+[Pipeline] }
+[Pipeline] // stage (Checkout)
+
+[Pipeline] stage (Build)
+[Pipeline] {
+
+==========================================
+Stage 2: Building the application...
+==========================================
++ echo 'Installing Python dependencies...'
+Installing Python dependencies...
++ pip install -r app/requirements.txt
+Collecting Flask==3.0.0
+  Downloading Flask-3.0.0-py3-none-any.whl (99 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 99.7/99.7 kB 2.1 MB/s eta 0:00:00
+Collecting Werkzeug==3.0.1
+  Downloading Werkzeug-3.0.1-py3-none-any.whl (226 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 226.7/226.7 kB 8.9 MB/s eta 0:00:00
+Collecting pytest==7.4.3
+  Downloading pytest-7.4.3-py3-none-any.whl (325 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 325.1/325.1 kB 11.2 MB/s eta 0:00:00
+Collecting requests==2.31.0
+  Downloading requests-2.31.0-py3-none-any.whl (62 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 62.6/62.6 kB 4.5 MB/s eta 0:00:00
+Installing collected packages: Werkzeug, requests, pytest, Flask
+Successfully installed Flask-3.0.0 Werkzeug-3.0.1 pytest-7.4.3 requests-2.31.0
++ echo '✓ Dependencies installed successfully'
+✓ Dependencies installed successfully
+
+[Pipeline] }
+[Pipeline] // stage (Build)
+
+[Pipeline] stage (Test)
+[Pipeline] {
+
+==========================================
+Stage 3: Running unit tests...
+==========================================
++ echo 'Running pytest...'
+Running pytest...
++ cd app
++ pytest test_app.py -v --tb=short
+======================== test session starts =========================
+platform linux -- Python 3.11.6, pytest-7.4.3, pluggy-1.3.0
+cachedir: .pytest_cache
+rootdir: /var/jenkins_home/workspace/demo-cicd-pipeline/app
+collected 4 items
+
+test_app.py::test_home_endpoint PASSED                         [ 25%]
+✓ Home endpoint test passed
+test_app.py::test_health_endpoint PASSED                       [ 50%]
+✓ Health endpoint test passed
+test_app.py::test_info_endpoint PASSED                         [ 75%]
+✓ Info endpoint test passed
+test_app.py::test_invalid_endpoint PASSED                      [100%]
+✓ Invalid endpoint test passed
+
+========================= 4 passed in 0.24s ==========================
++ echo '✓ All tests passed successfully'
+✓ All tests passed successfully
+
+[Pipeline] }
+[Pipeline] // stage (Test)
+
+[Pipeline] stage (Package)
+[Pipeline] {
+
+==========================================
+Stage 4: Building Docker image...
+==========================================
++ echo 'Building Docker image: demo-cicd-app:latest'
+Building Docker image: demo-cicd-app:latest
++ docker build -t demo-cicd-app:latest .
+Sending build context to Docker daemon  245.8kB
+Step 1/8 : FROM python:3.11-slim
+ ---> a3d77f9c1f23
+Step 2/8 : WORKDIR /app
+ ---> Using cache
+ ---> 8b9c5d9f4a21
+Step 3/8 : COPY app/requirements.txt .
+ ---> 9f8e7a6d2c13
+Step 4/8 : RUN pip install --no-cache-dir -r requirements.txt
+ ---> Running in 3d4e8f9a7b12
+Collecting Flask==3.0.0
+  Downloading Flask-3.0.0-py3-none-any.whl (99 kB)
+Collecting Werkzeug==3.0.1
+  Downloading Werkzeug-3.0.1-py3-none-any.whl (226 kB)
+Collecting pytest==7.4.3
+  Downloading pytest-7.4.3-py3-none-any.whl (325 kB)
+Collecting requests==2.31.0
+  Downloading requests-2.31.0-py3-none-any.whl (62 kB)
+Installing collected packages: Werkzeug, requests, pytest, Flask
+Successfully installed Flask-3.0.0 Werkzeug-3.0.1 pytest-7.4.3 requests-2.31.0
+Removing intermediate container 3d4e8f9a7b12
+ ---> 7c3f9e8a4d56
+Step 5/8 : COPY app/ .
+ ---> 6e5d8f7c9a24
+Step 6/8 : EXPOSE 5000
+ ---> Running in 4f7e9d8a6b13
+Removing intermediate container 4f7e9d8a6b13
+ ---> 5a6f8e9d7c42
+Step 7/8 : ENV PORT=5000
+ ---> Running in 7d9e8f6a5c14
+Removing intermediate container 7d9e8f6a5c14
+ ---> 8e7f9d6a4b15
+Step 8/8 : CMD ["python", "app.py"]
+ ---> Running in 9f8e7d6a5c16
+Removing intermediate container 9f8e7d6a5c16
+ ---> 1a2b3c4d5e6f
+Successfully built 1a2b3c4d5e6f
+Successfully tagged demo-cicd-app:latest
++ echo '✓ Docker image built successfully'
+✓ Docker image built successfully
++ echo 'Verifying Docker image...'
+Verifying Docker image...
++ docker images | grep demo-cicd-app
+demo-cicd-app   latest   1a2b3c4d5e6f   1 minute ago   245MB
+
+[Pipeline] }
+[Pipeline] // stage (Package)
+
+[Pipeline] stage (Deploy)
+[Pipeline] {
+
+==========================================
+Stage 5: Deploying with Docker Compose...
+==========================================
++ echo 'Stopping any existing containers...'
+Stopping any existing containers...
++ docker-compose down
+Removing demo-cicd-app ... done
+Removing network test_app-network ... done
++ echo 'Starting application with Docker Compose...'
+Starting application with Docker Compose...
++ docker-compose up -d
+Creating network "test_app-network" with driver "bridge"
+Creating demo-cicd-app ... done
++ echo 'Waiting for application to start...'
+Waiting for application to start...
++ sleep 10
++ echo '✓ Application deployed successfully'
+✓ Application deployed successfully
++ docker-compose ps
+     Name                   Command               State           Ports         
+--------------------------------------------------------------------------------
+demo-cicd-app   python app.py                    Up      0.0.0.0:5000->5000/tcp
+
+[Pipeline] }
+[Pipeline] // stage (Deploy)
+
+[Pipeline] stage (Health Check)
+[Pipeline] {
+
+==========================================
+Stage 6: Verifying application health...
+==========================================
++ echo 'Running health check script...'
+Running health check script...
++ chmod +x healthcheck.sh
++ ./healthcheck.sh
+
+================================================
+Starting Health Check for Demo CI/CD Application
+================================================
+
+1. Checking if container is running...
+✓ Container is running
+
+2. Checking health endpoint...
+   Attempt 1/5...
+✓ Health endpoint returned HTTP 200
+
+Health Response:
+{
+  "status": "healthy",
+  "service": "demo-app",
+  "timestamp": "2025-11-13T10:35:42.123456"
+}
+
+3. Checking home endpoint...
+✓ Home endpoint returned HTTP 200
+
+Home Response:
+{
+  "message": "Hello World from CI/CD Pipeline!",
+  "status": "running",
+  "timestamp": "2025-11-13T10:35:42.234567",
+  "version": "1.0.0"
+}
+
+4. Checking Docker container health status...
+   Container health status: healthy
+✓ Docker health check passed
+
+5. Container Information:
+   ----------------------
+     Name                   Command               State           Ports         
+--------------------------------------------------------------------------------
+demo-cicd-app   python app.py                    Up      0.0.0.0:5000->5000/tcp
+
+   Container Stats:
+CONTAINER       CPU %     MEM USAGE / LIMIT     NET I/O
+demo-cicd-app   0.12%     45.23MiB / 7.775GiB   1.85kB / 0B
+
+================================================
+✓✓✓ ALL HEALTH CHECKS PASSED ✓✓✓
+================================================
+
+Application Details:
+  - Status: HEALTHY
+  - URL: http://localhost:5000
+  - Health: http://localhost:5000/health
+  - Container: demo-cicd-app
+
+You can access the application at:
+  curl http://localhost:5000
+  curl http://localhost:5000/health
+================================================
+
++ echo '✓ Health check passed - Application is healthy!'
+✓ Health check passed - Application is healthy!
+
+[Pipeline] }
+[Pipeline] // stage (Health Check)
+
+[Pipeline] }
+[Pipeline] // node
+
+[Pipeline] End of Pipeline
+
+==========================================
+✓✓✓ PIPELINE COMPLETED SUCCESSFULLY ✓✓✓
+==========================================
+All stages completed:
+  ✓ Build
+  ✓ Test
+  ✓ Package (Docker Image)
+  ✓ Deploy (Docker Compose)
+  ✓ Health Check
+
+Application is running at: http://localhost:5000
+Health endpoint: http://localhost:5000/health
+==========================================
+
+Finished: SUCCESS
+Duration: 2 min 34 sec

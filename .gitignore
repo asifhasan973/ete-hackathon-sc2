@@ -1,0 +1,40 @@
+# Git ignore file for CI/CD demo project
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Docker
+*.log
+
+# Jenkins
+jenkins_home/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Screenshots (keep the example ones)
+!screenshots/*.png
